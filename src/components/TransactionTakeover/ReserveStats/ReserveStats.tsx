@@ -303,12 +303,12 @@ function ReserveStats({
         <Metric
           row
           label='Liquidation penalty'
-          value={formatPercent(reserve.liquidationPenalty)}
+          value={formatPercent(reserve.liquidationBonus)}
         />
         <Metric
           row
           label='Max liquidation penalty'
-          value={<>{formatPercent(reserve.maxLiquidationPenalty)}</>}
+          value={<>{formatPercent(reserve.maxLiquidationBonus)}</>}
           tooltip='Liquidation penalty increases past close LTV until max close LTV, where max liquidation penalty occurs.'
         />
         <Metric
