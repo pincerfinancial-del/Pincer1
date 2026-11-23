@@ -1,5 +1,4 @@
 import Head from 'next/head';
-import NoSSR from 'components/NoSSR';
 import Link from 'next/link';
 import { Box, Flex, Text, Button } from '@chakra-ui/react';
 import Image from 'next/image';
@@ -42,13 +41,7 @@ export default function Home() {
           minH="70vh"
           textAlign="center"
         >
-          <Flex align="center" mb={6}>
         
-            
-          </Flex>
-          <Text fontSize="2xl" maxW="700px">
-          
-          </Text>
         </Flex>
       </Box>
     </>

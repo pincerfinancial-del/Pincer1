@@ -1,7 +1,6 @@
 import { useEffect, useState, type ReactNode } from 'react';
 import { useMediaQuery } from '@chakra-ui/react';
 import { WalletAdapterNetwork } from '@solana/wallet-adapter-base';
-import NoSSR from 'components/NoSSR';
 import { ENVIRONMENT } from 'common/config';
 import { selectedRpcAtom } from 'stores/settings';
 import { useAtom } from 'jotai';
