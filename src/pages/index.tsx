@@ -1,7 +1,6 @@
 import Head from 'next/head';
 import Link from 'next/link';
-import { Box, Flex, Text, Button } from '@chakra-ui/react';
-import Image from 'next/image';
+import { Box, Flex, Button } from '@chakra-ui/react';
 
 const buttonStyle = {
   size: 'lg' as const,
@@ -40,9 +39,7 @@ export default function Home() {
           justify="center"
           minH="70vh"
           textAlign="center"
-        >
-        
-        </Flex>
+        />
       </Box>
     </>
   );
