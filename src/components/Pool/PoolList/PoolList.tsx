@@ -1,4 +1,4 @@
-import { Flex, List, ListItem, Text } from '@chakra-ui/react';
+import { Box, Flex, SimpleGrid, Text } from '@chakra-ui/react';
 import { ReserveWithMetadataType } from 'stores/pools';
 import {
   formatCompact,
@@ -7,12 +7,14 @@ import {
   formatUsd,
 } from 'utils/numberFormatter';
 import Token from 'components/Token/Token';
-import Metric from 'components/Metric/Metric';
-import {
-  ASSET_BORROW_LIMIT_TOOLTIP,
-  ASSET_SUPPLY_LIMIT_TOOLTIP,
-} from '../Pool';
 import { U64_MAX } from '@solendprotocol/solend-sdk';
+
+function amount(value: { isGreaterThan: (n: number) => boolean }, symbol: string) {
+  const shown = value.isGreaterThan(1000000)
+    ? formatCompact(value as never)
+    : formatToken(value as never, 2);
+  return `${shown} ${symbol}`;
+}
 
 export default function PoolList({
   selectReserveWithModal,
@@ -22,119 +24,88 @@ export default function PoolList({
   reserves: Array<ReserveWithMetadataType>;
 }) {
   return (
-    <List>
-      {reserves.map((reserve, index) => {
-        const atSupplyLimit =
-          reserve.reserveSupplyCap.eq(0) ||
-          reserve.totalSupply.isGreaterThanOrEqualTo(
-            reserve.reserveSupplyCap.times(
-              Math.min(0.9999, 1 - 1 / Number(reserve.reserveSupplyCap)),
-            ),
-          );
+    <SimpleGrid columns={{ base: 1, md: 2, xl: 3 }} spacing={4} pt={4}>
+      {reserves.map((reserve) => {
+        const supplyCap = reserve.reserveSupplyLimit;
+        const borrowCap = reserve.reserveBorrowLimit;
+ const atSupplyLimit =
+  reserve.reserveSupplyLimit.eq(0) ||
+  reserve.totalSupply.isGreaterThanOrEqualTo(
+    reserve.reserveSupplyLimit.times(
+      Math.min(0.9999, 1 - 1 / Number(reserve.reserveSupplyLimit)),
+    ),
+  );
 
-        const atBorrowLimit =
-          reserve.reserveBorrowCap.eq(0) ||
-          reserve.totalBorrow.isGreaterThanOrEqualTo(
-            reserve.reserveBorrowCap.times(
-              Math.min(0.9999, 1 - 1 / Number(reserve.reserveBorrowCap)),
-            ),
-          );
+const atBorrowLimit =
+  reserve.reserveBorrowLimit.eq(0) ||
+  reserve.totalBorrow.isGreaterThanOrEqualTo(
+    reserve.reserveBorrowLimit.times(
+      Math.min(0.9999, 1 - 1 / Number(reserve.reserveBorrowLimit)),
+    ),
+  );
+        const symbol =
+          reserve.symbol ??
+          `${reserve.mintAddress.slice(0, 4)}...${reserve.mintAddress.slice(-4)}`;
 
         return (
-          <ListItem
+          <Box
             key={reserve.address}
+            as="button"
+            type="button"
+            w="100%"
+            textAlign="left"
+            bg="neutralAlt"
+            border="1px solid"
+            borderColor="line"
+            borderRadius="16px"
+            p={4}
+            cursor="pointer"
+            transition="border-color 0.15s ease, transform 0.15s ease"
+            _hover={{ borderColor: 'brand', transform: 'translateY(-2px)' }}
             onClick={() => selectReserveWithModal(reserve.address)}
-            cursor='pointer'
-            borderTop={index === 0 ? undefined : '1px'}
-            py={2}
           >
-            <Flex align='center' justify='space-between'>
-              <Flex align='center' justify='center' flex={1} direction='column'>
-                <Token size={32} reserve={reserve} />
-                <Text pt={2}>
-                  {reserve.symbol ??
-                    `${reserve.mintAddress.slice(
-                      0,
-                      4,
-                    )}...${reserve.mintAddress.slice(
-                      -4,
-                      reserve.mintAddress.length - 1,
-                    )}`}
-                </Text>
-                <Text variant='caption' color='secondary'>
-                  {formatUsd(reserve.price)}
-                </Text>
+            <Flex align="center" justify="space-between" mb={4}>
+              <Flex align="center" gap={3}>
+                <Token size={40} reserve={reserve} />
+                <Box>
+                  <Text fontWeight="600">{symbol}</Text>
+                  <Text variant="caption" color="secondary">
+                    {formatUsd(reserve.price)}
+                  </Text>
+                </Box>
               </Flex>
-              <Flex w='60%' direction='column'>
-                <Metric
-                  label='Open LTV / BW'
-                  value={
-                    <Flex gap={1} align='center'>
-                      <Text>
-                        {formatPercent(reserve.loanToValueRatio, false, 0)}
-                      </Text>
-                      <Text color='secondary' variant='caption'>
-                        /
-                      </Text>
-                      <Text>
-                        {reserve.addedBorrowWeightBPS.toString() !== U64_MAX
-                          ? formatToken(
-                              reserve.borrowWeight.toString(),
-                              2,
-                              false,
-                              true,
-                            )
-                          : '∞'}
-                      </Text>
-                    </Flex>
-                  }
-                  row
-                />
-                <Metric
-                  label='Total supply'
-                  tooltip={
-                    atSupplyLimit ? ASSET_SUPPLY_LIMIT_TOOLTIP : undefined
-                  }
-                  value={
-                    <Text color={atSupplyLimit ? 'secondary' : undefined}>
-                      {reserve.totalSupply.isGreaterThan(1000000)
-                        ? formatCompact(reserve.totalSupply)
-                        : formatToken(reserve.totalSupply, 2)}{' '}
-                      {reserve.symbol}
-                    </Text>
-                  }
-                  row
-                />
-                <Metric
-                  label='Supply APR'
-                  value={formatPercent(reserve.supplyInterest)}
-                  row
-                />
-                <Metric
-                  label='Total borrow'
-                  tooltip={
-                    atSupplyLimit ? ASSET_BORROW_LIMIT_TOOLTIP : undefined
-                  }
-                  value={
-                    <Text color={atBorrowLimit ? 'secondary' : undefined}>
-                      {reserve.totalBorrow.isGreaterThan(1000000)
-                        ? formatCompact(reserve.totalBorrow)
-                        : formatToken(reserve.totalBorrow, 2)}{' '}
-                      {reserve.symbol}
-                    </Text>
-                  }
-                  row
-                />
-                <Metric
-                  label='Borrow APR'
-                  value={formatPercent(reserve.borrowInterest)}
-                  row
-                />
-              </Flex>
+              <Text fontSize="sm" color="secondary">
+                {formatPercent(reserve.loanToValueRatio, false, 0)} LTV
+                {reserve.addedBorrowWeightBPS.toString() !== U64_MAX
+                  ? ` / ${formatToken(reserve.borrowWeight.toString(), 2, false, true)}`
+                  : ''}
+              </Text>
             </Flex>
-          </ListItem>
+            <SimpleGrid columns={2} spacing={3}>
+              <Box>
+                <Text fontSize="xs" color="secondary">Supply APR</Text>
+                <Text fontSize="md">{formatPercent(reserve.supplyInterest)}</Text>
+              </Box>
+              <Box>
+                <Text fontSize="xs" color="secondary">Borrow APR</Text>
+                <Text fontSize="md">{formatPercent(reserve.borrowInterest)}</Text>
+              </Box>
+              <Box>
+                <Text fontSize="xs" color="secondary">Total supply</Text>
+                <Text fontSize="sm" color={atSupplyLimit ? 'secondary' : 'primary'}>
+                  {amount(reserve.totalSupply, symbol)}
+                </Text>
+              </Box>
+              <Box>
+                <Text fontSize="xs" color="secondary">Total borrow</Text>
+                <Text fontSize="sm" color={atBorrowLimit ? 'secondary' : 'primary'}>
+                  {amount(reserve.totalBorrow, symbol)}
+                </Text>
+              </Box>
+            </SimpleGrid>
+          </Box>
         );
       })}
-    </List>
+    </SimpleGrid>
   );
 }

@@ -68,10 +68,10 @@ export default function PoolTable({
       meta: { isNumeric: true },
       cell: ({ row: { original: reserve } }) => {
         const atSupplyLimit =
-          reserve.reserveSupplyCap.eq(0) ||
+          reserve.reserveSupplyLimit.eq(0) ||
           reserve.totalSupply.isGreaterThanOrEqualTo(
-            reserve.reserveSupplyCap.times(
-              Math.min(0.9999, 1 - 1 / Number(reserve.reserveSupplyCap)),
+            reserve.reserveSupplyLimit.times(
+              Math.min(0.9999, 1 - 1 / Number(reserve.reserveSupplyLimit)),
             ),
           );
 
@@ -107,10 +107,11 @@ export default function PoolTable({
       meta: { isNumeric: true },
       cell: ({ row: { original: reserve } }) => {
         const atBorrowLimit =
-          reserve.reserveBorrowCap.eq(0) ||
+          !reserve.reserveBorrowLimit ||
+          reserve.reserveBorrowLimit.eq(0) ||
           reserve.totalBorrow.isGreaterThanOrEqualTo(
-            reserve.reserveBorrowCap.times(
-              Math.min(0.9999, 1 - 1 / Number(reserve.reserveBorrowCap)),
+            reserve.reserveBorrowLimit.times(
+              Math.min(0.9999, 1 - 1 / Number(reserve.reserveBorrowLimit)),
             ),
           );
 
