@@ -86,6 +86,7 @@ export const loadPoolsAtom = atom(
         switchboardProgram,
         PROGRAM_ID,
         currentSlot,
+        false,
         DEBUG_MODE,
       ),
     );
@@ -218,6 +219,7 @@ export const selectedPoolAtom = atom(
       connection,
       PROGRAM_ID,
       currentSlot,
+      false,
       switchboardProgram,
       DEBUG_MODE,
     );
