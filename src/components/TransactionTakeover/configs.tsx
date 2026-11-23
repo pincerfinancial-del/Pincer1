@@ -16,6 +16,7 @@ import { sendAndConfirmStrategy } from 'components/TransactionTakeover/util';
 import { WalletContextState } from '@solana/wallet-adapter-react';
 import { Wallet } from '@coral-xyz/anchor';
 
+
 const SOL_PADDING_FOR_RENT_AND_FEE = 0.02;
 
 export function sufficientSOLForTransaction(wallet: WalletType) {
@@ -49,7 +50,7 @@ export const supplyConfigs = {
       wallet,
       {
         environment: ENVIRONMENT,
-      }
+      },
     );
 
     return sendAndConfirmStrategy(
@@ -72,7 +73,6 @@ export const supplyConfigs = {
   ) => {
     if (!obligation) return null;
 
-    // Allow action despite position limit, provided user already has a position in this asset
     const positionLimitReached =
       obligation.positions > POSITION_LIMIT &&
       !obligation.deposits
@@ -83,7 +83,7 @@ export const supplyConfigs = {
       return 'Max number of positions reached';
     }
     if (
-      reserve.totalSupply.plus(value).isGreaterThan(reserve.reserveSupplyCap)
+      reserve.totalSupply.plus(value).isGreaterThan(reserve.reserveSupplyLimit)
     ) {
       return 'Over reserve deposit limit';
     }
@@ -138,7 +138,7 @@ export const supplyConfigs = {
     };
   },
   calculateMax: (reserve: SelectedReserveType, wallet: WalletType) => {
-    const supplyCapRemaining = reserve.reserveSupplyCap
+    const supplyCapRemaining = reserve.reserveSupplyLimit
       .minus(reserve.totalSupply)
       .minus(0.2);
 
@@ -173,21 +173,24 @@ export const borrowConfigs = {
     postCallback?: () => void,
     skipPreflight?: boolean,
   ) => {
-    let hostAta = undefined;
-    if (HOST_ATA) {
-      const hostTokenAccountAddress = await getAssociatedTokenAddress(
-        new PublicKey(selectedReserve.mintAddress),
-        new PublicKey(HOST_ATA),
-      );
+         let hostAta = undefined;
+    console.log('HOST_ATA raw:', JSON.stringify(HOST_ATA));
 
-      const hostTokenAccountInfo = await connection.getAccountInfo(
-        hostTokenAccountAddress,
-      );
-
-      if (hostTokenAccountInfo) {
-        hostAta = hostTokenAccountAddress;
+    if (HOST_ATA && typeof HOST_ATA === 'string' && HOST_ATA.length > 30) {
+      try {
+        const hostWallet = new PublicKey(HOST_ATA.trim());
+        const mint = new PublicKey(selectedReserve.mintAddress);
+        hostAta = await getAssociatedTokenAddress(mint, hostWallet);
+        console.log('hostAta derived:', hostAta.toBase58());
+      } catch (e) {
+        console.error('HOST_ATA failed:', e);
       }
+    } else {
+      console.warn('HOST_ATA missing or invalid:', HOST_ATA);
     }
+
+   
+  
 
     const solendAction = await SolendActionCore.buildBorrowTxns(
       pool,
@@ -198,7 +201,7 @@ export const borrowConfigs = {
       {
         environment: ENVIRONMENT,
         hostAta,
-      }
+      },
     );
 
     return sendAndConfirmStrategy(
@@ -234,7 +237,6 @@ export const borrowConfigs = {
       .dividedBy(reserve.maxPrice)
       .dividedBy(reserve.borrowWeight);
 
-    // Allow action despite position limit, provided user already has a position in this asset
     const positionLimitReached =
       obligation.positions > POSITION_LIMIT &&
       !obligation.borrows
@@ -259,7 +261,7 @@ export const borrowConfigs = {
     if (
       obligation?.maxPriceUserTotalWeightedBorrow
         .plus(value)
-        .isGreaterThanOrEqualTo(reserve.reserveBorrowCap)
+        .isGreaterThanOrEqualTo(reserve.reserveBorrowLimit)
     ) {
       return 'Over reserve borrow limit';
     }
@@ -327,7 +329,7 @@ export const borrowConfigs = {
       return new BigNumber(0);
     }
 
-    const borrowCapRemaining = reserve.reserveBorrowCap.minus(
+    const borrowCapRemaining = reserve.reserveBorrowLimit.minus(
       reserve.totalBorrow,
     );
 
@@ -383,7 +385,7 @@ export const withdrawConfigs = {
       wallet,
       {
         environment: ENVIRONMENT,
-      }
+      },
     );
 
     return sendAndConfirmStrategy(
@@ -662,7 +664,6 @@ export const repayConfigs = {
       return new BigNumber(0);
     }
 
-    // Don't read amount from wSOL and take SOL balance instead
     const asset = wallet.find(
       (ass) => ass.mintAddress === reserve.mintAddress && ass.symbol !== 'wSOL',
     );
