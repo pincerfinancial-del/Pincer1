@@ -173,7 +173,7 @@ export const borrowConfigs = {
     postCallback?: () => void,
     skipPreflight?: boolean,
   ) => {
-         let hostAta = undefined;
+           let hostAta = undefined;
     console.log('HOST_ATA raw:', JSON.stringify(HOST_ATA));
 
     if (HOST_ATA && typeof HOST_ATA === 'string' && HOST_ATA.length > 30) {
@@ -189,9 +189,6 @@ export const borrowConfigs = {
       console.warn('HOST_ATA missing or invalid:', HOST_ATA);
     }
 
-   
-  
-
     const solendAction = await SolendActionCore.buildBorrowTxns(
       pool,
       selectedReserve,
@@ -203,7 +200,6 @@ export const borrowConfigs = {
         hostAta,
       },
     );
-
     return sendAndConfirmStrategy(
       solendAction,
       connection,
