@@ -1,62 +1,56 @@
 import Head from 'next/head';
-import { Suspense } from 'react';
-import Loading from 'components/Loading/Loading';
-import NoSSR from 'react-no-ssr';
-import Solend from './dashboard';
-import BigNumber from 'bignumber.js';
+import NoSSR from 'components/NoSSR';
+import Link from 'next/link';
+import { Box, Flex, Text, Button } from '@chakra-ui/react';
+import Image from 'next/image';
 
-BigNumber.config({ ROUNDING_MODE: BigNumber.ROUND_DOWN });
+const buttonStyle = {
+  size: 'lg' as const,
+  borderRadius: 'full',
+  bg: '#F7F3EA',
+  color: '#1a1a1a',
+  _hover: { bg: '#FFFDF8', color: '#1a1a1a' },
+  _active: { bg: '#9d20a1', color: '#f0dbdb' },
+};
 
-export default function Index() {
+export default function Home() {
   return (
     <>
       <Head>
-        <title>Solend | Lend and borrow crypto on Solana</title>
-        <meta
-          name='description'
-          content='Solend is a DeFi protocol for lending and borrowing on the Solana blockchain. Think Aave or Compound on Solana. Solend allows anyone with an internet connection to earn interest by lending their crypto assets, and allows them to use their deposits as collateral for borrowing.'
-        />
-        <meta
-          property='og:description'
-          content='Solend is a DeFi protocol for lending and borrowing on the Solana blockchain. Think Aave or Compound on Solana. Solend allows anyone with an internet connection to earn interest by lending their crypto assets, and allows them to use their deposits as collateral for borrowing.'
-        />
-        <meta property='og:type' content='website' />
-        <meta
-          property='og:title'
-          content='Solend | Lend and borrow on Solana'
-        />
-        <meta property='og:image' content='/og_image.png' />
-        <meta name='twitter:card' content='summary' />
-        <meta name='twitter:site' content='@solendprotocol' />
-        <meta name='viewport' content='width=device-width, initial-scale=1' />
-        <link
-          rel='apple-touch-icon'
-          sizes='180x180'
-          href='/apple-touch-icon.png'
-        />
-        <link
-          rel='icon'
-          type='image/png'
-          sizes='32x32'
-          href='/favicon-32x32.png'
-        />
-        <link rel='icon' href='/favicon.ico' />
-        <link
-          rel='icon'
-          type='image/png'
-          sizes='16x16'
-          href='/favicon-16x16.png'
-        />
-        <link rel='manifest' href='/site.webmanifest' />
-        <link rel='mask-icon' href='/safari-pinned-tab.svg' color='#5bbad5' />
-        <meta name='msapplication-TileColor' content='#da532c' />
-        <meta name='theme-color' content='#ffffff' />
+        <title>Pincer Finance</title>
       </Head>
-      <NoSSR>
-        <Suspense fallback={<Loading />}>
-          <Solend />
-        </Suspense>
-      </NoSSR>
+      <Box
+        minH="100vh"
+        color="white"
+        bgImage="url('/title2.jpg')"
+        bgSize="cover"
+        bgPosition="center"
+        bgRepeat="no-repeat"
+      >
+        <Flex as="nav" p={6} justify="flex-end" gap={4}>
+          <Button as={Link} href="/platform" {...buttonStyle}>
+            Solana DeFi
+          </Button>
+          <Button as={Link} href="/about" {...buttonStyle}>
+            About
+          </Button>
+        </Flex>
+        <Flex
+          direction="column"
+          align="center"
+          justify="center"
+          minH="70vh"
+          textAlign="center"
+        >
+          <Flex align="center" mb={6}>
+        
+            
+          </Flex>
+          <Text fontSize="2xl" maxW="700px">
+          
+          </Text>
+        </Flex>
+      </Box>
     </>
   );
 }
