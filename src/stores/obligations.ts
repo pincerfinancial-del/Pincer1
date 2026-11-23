@@ -12,10 +12,15 @@ import {
   fetchObligationsByAddress,
   formatObligation,
   Obligation,
+  ReserveType,
 } from '@solendprotocol/solend-sdk';
 import { DEBUG_MODE, PROGRAM_ID } from 'common/config';
 
 export type ObligationType = Awaited<ReturnType<typeof formatObligation>>;
+
+function reservesByAddress(reserves: ReserveType[]) {
+  return Object.fromEntries(reserves.map((reserve) => [reserve.address, reserve]));
+}
 
 export const rawObligationsAtom = atom<{
   [address: string]: RawObligationType;
@@ -31,7 +36,7 @@ export const obligationsAtom = atom<Array<ObligationType>>((get) => {
       o.info
         ? formatObligation(
             o as { pubkey: PublicKey; info: Obligation },
-            pools[o.info.lendingMarket.toBase58()],
+            reservesByAddress(pools[o.info.lendingMarket.toBase58()].reserves),
           )
         : null,
     )
@@ -93,7 +98,7 @@ const obligationsFamily = atomFamily((address: string) =>
       if (!pool.reserves.length) return null;
       return formatObligation(
         rawObligation as { pubkey: PublicKey; info: Obligation },
-        pool,
+        reservesByAddress(pool.reserves),
       );
     },
     (get, set, arg: RawObligationType) => {
