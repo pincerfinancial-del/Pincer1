@@ -26,8 +26,6 @@ export default function PoolList({
   return (
     <SimpleGrid columns={{ base: 1, md: 2, xl: 3 }} spacing={4} pt={4}>
       {reserves.map((reserve) => {
-        const supplyCap = reserve.reserveSupplyLimit;
-        const borrowCap = reserve.reserveBorrowLimit;
  const atSupplyLimit =
   reserve.reserveSupplyLimit.eq(0) ||
   reserve.totalSupply.isGreaterThanOrEqualTo(
